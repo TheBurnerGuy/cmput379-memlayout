@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include "memlayout.h"
 
+int PAGE_SIZE = 65536;
+
 int main(){
 	
 	struct memregion* regionlist = malloc(sizeof(struct memregion)*35);
