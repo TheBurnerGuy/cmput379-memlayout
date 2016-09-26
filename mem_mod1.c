@@ -7,14 +7,18 @@
 
 int main(){
 	
-	struct memregion* regionlist = malloc(sizeof(struct memregion)*10);
+	struct memregion* regionlist = malloc(sizeof(struct memregion)*35);
 	if (regionlist == NULL){
 		printf("Failed to allocate memory\n");
 		exit(0);
 	}
 	printf("Entering function\n");
-	int memlayout = get_mem_layout(regionlist,10);
-	printf("End: %u",memlayout);
+	int memlayout = get_mem_layout(regionlist,35);
+	printf("End: %u\n",memlayout);
+	int i;
+	for(i = 0; i<35; ++i){
+		printf("memregion[%d]:\tfrom:%p\tto:%p\tmode:%d\n",i,regionlist[i].from,regionlist[i].to,regionlist[i].mode);
+	}
 }
 
 //jmp_buf env;
