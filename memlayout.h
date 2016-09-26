@@ -1,7 +1,7 @@
 #define MEM_RW 0
 #define MEM_RO 1
 #define MEM_NO 2
-#define PAGE_SIZE 65536
+extern int PAGE_SIZE;
 
 struct memregion {
 	void *from;
