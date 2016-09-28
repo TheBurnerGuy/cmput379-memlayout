@@ -23,6 +23,12 @@ int main(){
 	int i;
 	char* mode_array[3] = {"RW","RO","NO"};
 	char *place = (char*)mmap(0, 5000000, PROT_READ | PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, 0, 0); //place 5 000 000 bytes of anonymous mapping into the memory mapping segment
+	if (place == (void*)0xffffffff){
+		//Failed to allocate space
+		printf("Failed to allocate memory\n");
+		exit(0);
+	}
+	
 	printf("Entering function\n");
 	int memlayout = get_mem_layout(regionlist,35);
 	printf("End: %u\n",memlayout);
