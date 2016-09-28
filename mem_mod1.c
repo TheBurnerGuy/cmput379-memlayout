@@ -20,11 +20,11 @@ int main(){
 		exit(0);
 	}
 	int i;
+	char* mode_array[3] = {"RW","RO","NO"};
 	printf("Entering function\n");
 	int memlayout = get_mem_layout(regionlist,35);
 	printf("End: %u\n",memlayout);
 	printf("Printing regions found:\n");
-	char* mode_array[3] = {"RW","RO","NO"};
 	for(i = 0; i<35; ++i){
 		printf("%p-%p %s\n",regionlist[i].from,regionlist[i].to,mode_array[regionlist[i].mode]);
 	}
