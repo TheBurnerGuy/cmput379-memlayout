@@ -6,7 +6,7 @@
 #include <sys/mman.h>
 #include "memlayout.h"
 
-int PAGE_SIZE = 65536;
+int PAGE_SIZE = 4096;
 
 int main(){
 	
