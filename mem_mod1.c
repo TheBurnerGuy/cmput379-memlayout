@@ -23,6 +23,9 @@ int main(){
 	for(i = 0; i<35; ++i){
 		printf("%p-%p %s\n",regionlist[i].from,regionlist[i].to,mode_array[regionlist[i].mode]);
 	}
+	
+	sbrk(500000); //increase size of heap by 500000 bytes
+	
 	struct memregion* difflist = malloc(sizeof(struct memregion)*10);
 	if (difflist == NULL){
 		printf("Failed to allocate memory\n");
