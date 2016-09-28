@@ -14,7 +14,6 @@
 int get_mem_layout(struct memregion *regions, unsigned int size){
 	int current_region = 0;
 	int state = 3; //Initially set to 3, since current region is not found yet
-	int change = 1; //1 if state has changed, 0 if not
 	unsigned int temp; //Used to store the value if value is readable
 	
 	// Initializing nested signal handler function
@@ -28,6 +27,8 @@ int get_mem_layout(struct memregion *regions, unsigned int size){
 	segv.sa_flags = 0;
 	sigaction(SIGSEGV,&segv,0);
 	
+	regions[0].from = (void*)0; //Initializes first region
+	
 	//Run a for loop until end of memory address is reached or size reached
 	unsigned int i;
 	for(i = 0; i < 0xffffffff; i+=PAGE_SIZE){
@@ -35,10 +36,6 @@ int get_mem_layout(struct memregion *regions, unsigned int size){
 		if(i==0 && state!=3) break;
 		//Check if regions changed
 		//printf("%u\n",i); //Test if i is going through all
-		if(change){
-			regions[current_region].from = (void*)i;
-			change = 0;
-		}
 		int checkpoint = sigsetjmp(env,1);
 		unsigned int* pointer_check = (unsigned int*)i;
 		if(!checkpoint){ temp = *pointer_check; }
@@ -53,7 +50,9 @@ int get_mem_layout(struct memregion *regions, unsigned int size){
 				}
 				state = MEM_NO;
 				++current_region;
-				change = 1;
+				if(current_region<size){ //Check again if incrementing regions has exceeded its maximum size
+					regions[current_region].from = (void*)i;
+				}
 			}
 			continue;
 		}
@@ -68,12 +67,14 @@ int get_mem_layout(struct memregion *regions, unsigned int size){
 			if(state != MEM_RO){
 				//Check if current region has exceeded max size
 				if(current_region<size){
-					regions[current_region].to = (void*)i-1+PAGE_SIZE;
+					regions[current_region].to = (void*)i-1;
 					regions[current_region].mode = state;
 				}
 				state = MEM_RO;
 				++current_region;
-				change = 1;
+				if(current_region<size){ //Check again if incrementing regions has exceeded its maximum size
+					regions[current_region].from = (void*)i;
+				}
 				continue;
 			}
 		}
@@ -87,7 +88,9 @@ int get_mem_layout(struct memregion *regions, unsigned int size){
 			}
 			state = MEM_RW;
 			++current_region;
-			change = 1;
+			if(current_region<size){ //Check again if incrementing regions has exceeded its maximum size
+				regions[current_region].from = (void*)i;
+			}
 		}
 	}
 	//Set an end to the last region if for loop ended without a base case
