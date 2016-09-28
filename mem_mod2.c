@@ -31,6 +31,11 @@ int main(){
 	}
 	
 	char *place = (char*)mmap(NULL, 500000, PROT_READ | PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, 0, 0); //place 500 000 bytes of anonymous mapping into the memory mapping segment
+	if (place == (void*)0xffffffff){
+		//Failed to allocate space
+		printf("Failed to allocate memory\n");
+		exit(0);
+	}
 	
 	memlayout = get_mem_diff(regionlist, 35, difflist, 10);
 	printf("End: %u\n",memlayout);
