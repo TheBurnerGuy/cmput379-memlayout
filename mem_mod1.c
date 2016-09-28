@@ -14,10 +14,15 @@ int main(){
 		printf("Failed to allocate memory\n");
 		exit(0);
 	}
+	struct memregion* difflist = malloc(sizeof(struct memregion)*10); //Used later for diff list
+	if (difflist == NULL){
+		printf("Failed to allocate memory\n");
+		exit(0);
+	}
+	int i;
 	printf("Entering function\n");
 	int memlayout = get_mem_layout(regionlist,35);
 	printf("End: %u\n",memlayout);
-	int i;
 	printf("Printing regions found:\n");
 	char* mode_array[3] = {"RW","RO","NO"};
 	for(i = 0; i<35; ++i){
@@ -26,11 +31,6 @@ int main(){
 	
 	sbrk(500000); //increase size of heap by 500000 bytes
 	
-	struct memregion* difflist = malloc(sizeof(struct memregion)*10);
-	if (difflist == NULL){
-		printf("Failed to allocate memory\n");
-		exit(0);
-	}
 	printf("Entering function\n");
 	memlayout = get_mem_diff(regionlist, 35, difflist, 10);
 	printf("End: %u\n",memlayout);
