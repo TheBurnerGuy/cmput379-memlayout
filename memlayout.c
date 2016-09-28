@@ -45,7 +45,7 @@ int get_mem_layout(struct memregion *regions, unsigned int size){
 			if(state != MEM_NO){
 				//Check if current region has exceeded max size
 				if(current_region<size){
-					regions[current_region].to = (void*)i-1+PAGE_SIZE;
+					regions[current_region].to = (void*)i-1;
 					regions[current_region].mode = state;
 				}
 				state = MEM_NO;
@@ -83,7 +83,7 @@ int get_mem_layout(struct memregion *regions, unsigned int size){
 		if(state != MEM_RW){
 			//Check if current region has exceeded max size
 			if(current_region<size){
-				regions[current_region].to = (void*)i-1+PAGE_SIZE;
+				regions[current_region].to = (void*)i-1;
 				regions[current_region].mode = state;
 			}
 			state = MEM_RW;
