@@ -4,9 +4,9 @@ In all of the driver programs (with page size = 4096), the first five lines are 
 pages. The change is observed in the 2nd line of the difference output which shows the region has changed from inaccessable to
 read-writeable.
 
-mem_mod2 uses mmap() to create a 500000 byte anonymous map. This change is observed in the memory mapping area which is located
+3) mem_mod2 uses mmap() to create a 500000 byte anonymous map. This change is observed in the memory mapping area which is located
 in the address space below the stack (shown in the first line of the difference regions). This area has changed from unmapped,
 unused memory into read-writeable memory pages because the PROT_READ and PROT_WRITE arguments are used.
 
-mem_mod3 uses mmap() like mem_mod2 to allocate 5 000 000 bytes of read-writeable memory in the memory mapping section. It then
+4) mem_mod3 uses mmap() like mem_mod2 to allocate 5 000 000 bytes of read-writeable memory in the memory mapping section. It then
 uses mprotect to write protect the region that is the memory mapping section. This change is seen in the second line of the difference ouput which shows 1220 pages (5 001 215 bytes) of memory in the memory segment have changed from read-writeable to read only.
