@@ -22,7 +22,7 @@ int main(){
 	}
 	int i;
 	char* mode_array[3] = {"RW","RO","NO"};
-	char *place = (char*)mmap(0, 5000000, PROT_READ | PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, 0, 0); //place 5 000 000 bytes of anonymous mapping into the memory mapping segment
+	char *place = mmap(0, 5000000, PROT_READ | PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, 0, 0); //place 5 000 000 bytes of anonymous mapping into the memory mapping segment
 	if (place == (void*)0xffffffff){
 		//Failed to allocate space
 		printf("Failed to allocate memory\n");
@@ -37,7 +37,7 @@ int main(){
 		printf("%p-%p %s\n",regionlist[i].from,regionlist[i].to,mode_array[regionlist[i].mode]);
 	}
 	
-   place = (char*)mmap(0, 5000000, PROT_READ, MAP_PRIVATE|MAP_ANONYMOUS, 0, 0); // change the memory mapping region from read-writeable to read only
+   	mprotect(place, 5000000, PROT_READ);
 	
 	memlayout = get_mem_diff(regionlist, 35, difflist, 10);
 	printf("End: %u\n",memlayout);
@@ -45,4 +45,5 @@ int main(){
 	for(i = 0; i<10; ++i){
 		printf("%p-%p %s\n",difflist[i].from,difflist[i].to,mode_array[difflist[i].mode]);
 	}
+	munmap(place, 5000000);
 }
