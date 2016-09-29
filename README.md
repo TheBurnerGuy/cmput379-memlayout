@@ -4,12 +4,14 @@ memlayout.c contains two functions, get_mem_layout which scans the entire memory
 
 ## Installation
 
-make all or make mem_mod[1-3] 
+make all or make mem_mod[1-3]
+
 Run the driver programs with ./mem_mod[1-3]
 
 ## Contributors
 
 Henry Lo
+
 Daniel Sopel
 
 ## Documentation
