@@ -1,19 +1,12 @@
-## Cmput379-Memlayout
+In all of the driver programs (with page size = 4096), the first five lines are the same. The first line (nil) - 0x8037ffff allocates roughly a gigabyte of data to the kernel read as non-readable memory as well as a offset of space between the end of the kernel space and the text section. The next line 0x8048000-0x8048fff is the ELF file/text section. The text section is write protected so the program cannot modify itself. The data section follows at the third line 0x8049000-0x8049fff and is read-writeable because the initialized variables can change during execution. The fourth line shows that the compiler allocated one page of memory as read only. This is to protect the BSS segment from being overwritten by data overflowing. The 5th line 0x804b000-0x804bfff is the read-writeable BSS section. The sixth line is  non-readable space between the end of the BSS section and the beginning of the heap. The 7th line is the space allocated to the heap as read-write memory. The eighth line is the non-readable unmapped memory space between the end of the heap and the memory mapping section or stack. This is followed by the stack in mem_mod1, and the memory mapping section and the stack in mem_mod2 and mem_mod3. The stack contains both read/write variables as expected of pointers and variable values. Besides the crucial memory allocations described below, much of the difference in each region is changes from read/write memory to read-only memory due to the freeing the variables used in get_mem_layout.
 
-memlayout.c contains two functions, get_mem_layout which scans the entire memory of calling process and returns a list of different regions in the address space, and get_mem_diff which scans the calling process's address space and returns a list of the differences between the regions in the address space and the regions contained in a passed array. The project contains three driver programs, mem_mod[1-3], which illustrate changes made to the address space of the progam.
+2) mem_mod1 uses the sbrk() command to increase the size of the heap. This causes unmapped memory to be mapped in read-writeable
+pages. The change is observed in the 2nd line of the difference output which shows the region has changed from inaccessable to
+read-writeable.
 
-## Installation
+mem_mod2 uses mmap() to create a 500000 byte anonymous map. This change is observed in the memory mapping area which is located
+in the address space below the stack (shown in the first line of the difference regions). This area has changed from unmapped,
+unused memory into read-writeable memory pages because the PROT_READ and PROT_WRITE arguments are used.
 
-make all or make mem_mod[1-3]
-
-Run the driver programs with ./mem_mod[1-3]
-
-## Contributors
-
-Henry Lo
-
-Daniel Sopel
-
-## Documentation
-
-see README.txt
+mem_mod3 uses mmap() like mem_mod2 to allocate 5 000 000 bytes of read-writeable memory in the memory mapping section. It then
+uses mprotect to write protect the region that is the memory mapping section. This change is seen in the second line of the difference ouput which shows 1220 pages (5 001 215 bytes) of memory in the memory segment have changed from read-writeable to read only.
