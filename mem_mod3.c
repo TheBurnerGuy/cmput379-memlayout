@@ -29,9 +29,9 @@ int main(){
 		exit(0);
 	}
 	
-	printf("Entering function\n");
+	printf("Entering get_mem_layoutn\n");
 	int memlayout = get_mem_layout(regionlist,35);
-	printf("End: %u\n",memlayout);
+	printf("# of regions found: %u\n",memlayout);
 	printf("Printing regions found:\n");
 	for(i = 0; i<35; ++i){
 		printf("%p-%p %s\n",regionlist[i].from,regionlist[i].to,mode_array[regionlist[i].mode]);
@@ -39,8 +39,9 @@ int main(){
 	
    	mprotect(place, 5000000, PROT_READ);
 	
+	printf("Entering get_mem_diff\n");
 	memlayout = get_mem_diff(regionlist, 35, difflist, 10);
-	printf("End: %u\n",memlayout);
+	printf("# of different regions found: %u\n",memlayout);
 	printf("Printing difference found:\n");
 	for(i = 0; i<10; ++i){
 		printf("%p-%p %s\n",difflist[i].from,difflist[i].to,mode_array[difflist[i].mode]);
