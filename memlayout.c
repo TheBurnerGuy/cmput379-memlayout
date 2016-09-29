@@ -7,9 +7,9 @@
 
 /*get_mem_layout()
  * Should check at every interval of PAGE_SIZE if it's readable/writable.
- * Keep track of currrent/previous region state. If it's different, 
+ * Keep track of current/previous region state. If it's different, 
  * set to to address-1 and create a new region its from being the current address.
- * Keep looping until memory reaches max_size 0xffffffff or regions reaches size.
+ * Keep looping until memory increments over the address space 0xffffffff.
  */
 int get_mem_layout(struct memregion *regions, unsigned int size){
 	int current_region = 0;
@@ -29,13 +29,12 @@ int get_mem_layout(struct memregion *regions, unsigned int size){
 	
 	regions[0].from = (void*)0; //Initializes first region
 	
-	//Run a for loop until end of memory address is reached or size reached
+	//Run a for loop until end of memory address is reached
 	unsigned int i;
 	for(i = 0; i < 0xffffffff; i+=PAGE_SIZE){
 		//Base Case: All memory addresses have been searched, i = 0
 		if(i==0 && state!=3) break;
 		//Check if regions changed
-		//printf("%u\n",i); //Test if i is going through all
 		int checkpoint = sigsetjmp(env,1);
 		unsigned int* pointer_check = (unsigned int*)i;
 		if(!checkpoint){ temp = *pointer_check; }
@@ -43,7 +42,7 @@ int get_mem_layout(struct memregion *regions, unsigned int size){
 			//If checkpoint has changed from 0 to 1, proof that it's unreadable
 			if(state == 3) state = MEM_NO; //Special case for the first region
 			if(state != MEM_NO){
-				//Check if current region has exceeded max size
+				//Check if current region has exceeded max size of regions array
 				if(current_region<size){
 					regions[current_region].to = (void*)i-1;
 					regions[current_region].mode = state;
@@ -65,7 +64,7 @@ int get_mem_layout(struct memregion *regions, unsigned int size){
 			//But it's readable, check if region changed
 			if(state == 3) state = MEM_RO; //Special case for the first region
 			if(state != MEM_RO){
-				//Check if current region has exceeded max size
+				//Check if current region has exceeded max size of regions array
 				if(current_region<size){
 					regions[current_region].to = (void*)i-1;
 					regions[current_region].mode = state;
@@ -81,7 +80,7 @@ int get_mem_layout(struct memregion *regions, unsigned int size){
 		//Assumption: File is writable, check if region changed
 		if(state == 3) state = MEM_RW; //Special case for the first region
 		if(state != MEM_RW){
-			//Check if current region has exceeded max size
+			//Check if current region has exceeded max size of regions array
 			if(current_region<size){
 				regions[current_region].to = (void*)i-1;
 				regions[current_region].mode = state;
@@ -93,9 +92,11 @@ int get_mem_layout(struct memregion *regions, unsigned int size){
 			}
 		}
 	}
-	//Set an end to the last region if for loop ended without a base case
-	regions[current_region].to = (void*)0xffffffff;
-	regions[current_region].mode = state;
+	//Set an end to the last region since loop breaks out before it can properly end
+	if(current_region<size){
+		regions[current_region].to = (void*)0xffffffff;
+		regions[current_region].mode = state;
+	}
 	return ++current_region; //Returns all regions found
 }
 
@@ -144,7 +145,6 @@ int get_mem_diff (struct memregion *regions, unsigned int howmany, struct memreg
 		//Base Case: Searching past maximum size entries in regions*
 		if(current_region >= howmany) break;
 		//Scan for current region's state
-		//printf("%u\n",i); //Test if i is going through all
 		int checkpoint = sigsetjmp(env,1);
 		unsigned int* pointer_check = (unsigned int*)i;
 		if(!checkpoint){ temp = *pointer_check; }
@@ -163,7 +163,7 @@ int get_mem_diff (struct memregion *regions, unsigned int howmany, struct memreg
 					}
 					change = 1;
 				}else{
-					//If expected a change, check if its still the same state in the diff
+					//If expected a change, check if its still the same state as the previous region for contiguous
 					if(state != previous_state){
 						//If not the same state, a new region that is different has been entered
 						thediff[diff_region].to = (void*)i-1;
@@ -174,7 +174,7 @@ int get_mem_diff (struct memregion *regions, unsigned int howmany, struct memreg
 						}
 					}
 				}
-			}else{//If state is the same, check if diff was scanning
+			}else{//If state is the same, check if diff was scanning for the end of a contiguous different region
 				if(change){
 					//If scanning, end diff region and stop scanning
 					thediff[diff_region].to = (void*)i-1;
@@ -204,7 +204,7 @@ int get_mem_diff (struct memregion *regions, unsigned int howmany, struct memreg
 					}
 					change = 1;
 				}else{
-					//If expected a change, check if its still the same state in the diff
+					//If expected a change, check if its still the same state as the previous region for contiguous
 					if(state != previous_state){
 						//If not the same state, a new region that is different has been entered
 						thediff[diff_region].to = (void*)i-1;
@@ -215,7 +215,7 @@ int get_mem_diff (struct memregion *regions, unsigned int howmany, struct memreg
 						}
 					}
 				}
-			}else{//If state is the same, check if diff was scanning
+			}else{//If state is the same, check if diff was scanning for the end of a contiguous different region
 				if(change){
 					//If scanning, end diff region and stop scanning
 					thediff[diff_region].to = (void*)i-1;
@@ -239,7 +239,7 @@ int get_mem_diff (struct memregion *regions, unsigned int howmany, struct memreg
 				}
 				change = 1;
 			}else{
-				//If expected a change, check if its still the same state in the diff
+				//If expected a change, check if its still the same state as the previous region for contiguous
 				if(state != previous_state){
 					//If not the same state, a new region that is different has been entered
 					thediff[diff_region].to = (void*)i-1;
@@ -250,7 +250,7 @@ int get_mem_diff (struct memregion *regions, unsigned int howmany, struct memreg
 					}
 				}
 			}
-		}else{//If state is the same, check if diff was scanning
+		}else{//If state is the same, check if diff was scanning for the end of a contiguous different region
 			if(change){
 				//If scanning, end diff region and stop scanning
 				thediff[diff_region].to = (void*)i-1;
